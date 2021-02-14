@@ -4,9 +4,13 @@ import bcrypt from 'bcrypt'
 import Cookies from 'cookies'
 import { verify } from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
+import dotenv from 'dotenv'
 
 import typeDefs from '../../graphql/typeDefs'
 import prisma from '../../prisma/prisma'
+import tokenGenerator from '../../lib/tokenGenerator'
+
+dotenv.config()
 
 const resolvers = {
   Query: {
@@ -15,6 +19,44 @@ const resolvers = {
     }
   },
   Mutation: {
+    login: async (_, { credentials }, context) => {
+      const cookies = context.cookies
+
+      const where = {}
+
+      if (credentials.user.email !== null && credentials.user.email !== '') {
+        where.email = credentials.user.email
+      } else {
+        where.userName = credentials.user.userName
+      }
+
+      const user = await prisma.user.findUnique({ where })
+
+      if (!user) {
+        throw new Error('No user with that email or username found')
+      }
+
+      const isValid = await bcrypt.compare(credentials.password, user.password)
+
+      if (!isValid) {
+        throw new Error('Invalid password')
+      }
+
+      const token = tokenGenerator(user.id, user.email, '5m')
+      const refreshToken = tokenGenerator(user.id, user.email, '1w')
+
+      const tokenDate = new Date(Date.now() + 60 * 5 * 1000)
+      const refreshDate = new Date(Date.now() + 60 * 60 * 24 * 7 * 1000)
+
+      cookies.set('mat-token', token, {
+        expires: tokenDate
+      })
+      cookies.set('mat-refresh-token', refreshToken, {
+        expires: refreshDate
+      })
+
+      return user
+    },
     createUser: async (_, { userData }, { prisma }) => {
 
       const hashedPassword = bcrypt.hashSync(userData.password, 10)
@@ -42,9 +84,69 @@ const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req, res }) => {
+
+    const cookies = new Cookies(req, res, { 
+      keys: [ process.env.COOKIE_KEY ]
+    })
+
     const context = {
       prisma,
-      response: res
+      response: res,
+      cookies
+    }
+
+    if (req.headers.authorization !== undefined) {
+      const refreshToken = cookies.get('mat-refresh-token')
+
+      const authHeader = req.headers.authorization
+      const payload = authHeader.replace('Bearer', '').trim()
+
+      const verified = verify(payload, "secret!!", (err, decoded) => {
+        return err ? false : decoded
+      })
+
+      const verifiedRefreshToken = verify(refreshToken, 'secret!!', (err, decoded) => {
+        return err ? false : decoded
+      })
+
+      /**
+       * If both tokens fail, return the context immediately
+       * Let the resolvers handle any errors
+       * Redirect back to login
+       */
+      if (!verified && !verifiedRefreshToken) {
+        cookies.set('ma-app-token')
+        cookies.set('ma-app-refresh-token')
+        return context
+      } 
+      /**
+       * If the token fails, but the refresh token is still good
+       * - create new tokens to send back as cookies
+       * - then use the verified refresh token to add the user to the context
+       */
+      else if (!verified && verifiedRefreshToken) {
+
+        const token = tokenGenerator(verifiedRefreshToken.id, verifiedRefreshToken.email, '5m')
+        const refreshToken = tokenGenerator(verifiedRefreshToken.id, verifiedRefreshToken.email, '1w')
+
+        const tokenDate = new Date(Date.now() + 60 * 5 * 1000)
+        const refreshDate = new Date(Date.now() + 60 * 60 * 24 * 7 * 1000)
+
+        // then create and send new tokens
+        cookies.set('mat-token', token, {
+          expires: tokenDate
+        })
+        cookies.set('mat-refresh-token', refreshToken, {
+          expires: refreshDate
+        })
+
+        const user = verifiedRefreshToken
+
+        context.verifiedUser = { user }
+      } else if (verified && verifiedRefreshToken) {
+        const user = verified
+        context.verifiedUser = { user }
+      }
     }
 
     return context
