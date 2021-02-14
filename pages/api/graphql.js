@@ -10,11 +10,13 @@ import prisma from '../../prisma/prisma'
 
 const resolvers = {
   Query: {
-
+    users: async (_, __, { prisma }) => {
+      return await prisma.user.findMany()
+    }
   },
   Mutation: {
     createUser: async (_, { userData }, { prisma }) => {
-      
+
       const hashedPassword = bcrypt.hashSync(userData.password, 10)
 
       delete userData.password
