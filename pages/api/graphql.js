@@ -15,7 +15,16 @@ dotenv.config()
 const resolvers = {
   Query: {
     users: async (_, __, { prisma }) => {
-      return await prisma.user.findMany()
+      const users = await prisma.user.findMany()
+
+      const nodes = users.map(user => {
+        return { node: user }
+      })
+
+      return {
+        edges: nodes,
+        total: nodes.length
+      }
     }
   },
   Mutation: {
