@@ -9,9 +9,11 @@ const typeDefs = gql`
 
   type Mutation {
     login(credentials: AuthInput!): User!
+    # all CRUD operations require a successful login. user ID's etc. 
+    # will only be provided by the app context
     createUser(userData: UserInput!): User!
-    updateUser(uuid: String! userData: UserInput): User
-    deleteUser(uuid: String!): User
+    updateUser(userData: UserInput!): User
+    deleteUser: User
   }
 
   input AuthUserInput {
