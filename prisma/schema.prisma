@@ -22,13 +22,26 @@ model User {
 
 model Technique {
   id Int @id @default(autoincrement())
+  uuid String @unique
   createdAt DateTime @default(now())
   udpatedAt DateTime @updatedAt
-  uuid String @unique
   name String
   slug String @unique
   description String? @default("")
   creator User @relation(fields: [ creatorId ], references: [ uuid ])
   creatorId String
   @@map(name: "techniques")
+}
+
+model Sequence {
+  id Int @id @default(autoincrement())
+  uuid String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  description String? @default("")
+  creator User @relation(fields: [ creatorId ], references: [ uuid ])
+  creatorId String
+  techniqueOrder Json
+  @@map(name: "sequences")
 }
