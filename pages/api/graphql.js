@@ -51,8 +51,8 @@ const resolvers = {
         throw new Error('Invalid password')
       }
 
-      const token = tokenGenerator(user.id, user.email, '5m')
-      const refreshToken = tokenGenerator(user.id, user.email, '1w')
+      const token = tokenGenerator(user.uuid, user.email, '5m')
+      const refreshToken = tokenGenerator(user.uuid, user.email, '1w')
 
       const tokenDate = new Date(Date.now() + 60 * 5 * 1000)
       const refreshDate = new Date(Date.now() + 60 * 60 * 24 * 7 * 1000)
