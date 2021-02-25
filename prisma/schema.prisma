@@ -19,3 +19,16 @@ model User {
   password String
   @@map(name: "users")
 }
+
+model Technique {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  udpatedAt DateTime @updatedAt
+  uuid String @unique
+  name String
+  slug String @unique
+  description String? @default("")
+  creator User @relation(fields: [ creatorId ], references: [ uuid ])
+  creatorId String
+  @@map(name: "techniques")
+}
