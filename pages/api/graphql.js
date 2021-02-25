@@ -81,6 +81,37 @@ const resolvers = {
           userName: userData.userName
         }
       })
+    },
+    updateUser: async (_, { userData }, { verifiedUser, prisma }) => {
+      const { user } = verifiedUser
+
+      if (!user) throw new Error('Not authenticated')
+
+      const updatedData = {}
+
+      for (const key in userData) {
+        if (Object.hasOwnProperty.call(userData, key)) {
+          const element = userData[key];
+          updatedData[key] = element
+        }
+      }
+
+      return await prisma.user.update({
+        where: {
+          uuid: user.uuid
+        },
+        data: updatedData
+      })
+    },
+    deleteUser: async (_, __, { verifiedUser, prisma }) => {
+      const { user } = verifiedUser
+      if (!user) throw new Error('Not authenticated')
+
+      return await prisma.user.delete({ 
+        where: {
+          uuid: user.uuid
+        }
+      })
     }
   }
 }
