@@ -17,6 +17,8 @@ model User {
   userName String? @unique
   email String @unique
   password String
+  techniques Technique[]
+  sequences Sequence[]
   @@map(name: "users")
 }
 
@@ -30,6 +32,7 @@ model Technique {
   description String? @default("")
   creator User @relation(fields: [ creatorId ], references: [ uuid ])
   creatorId String
+  techniquesOnSequences TechniquesOnSequences[]
   @@map(name: "techniques")
 }
 
@@ -43,5 +46,17 @@ model Sequence {
   creator User @relation(fields: [ creatorId ], references: [ uuid ])
   creatorId String
   techniqueOrder Json
+  techniquesOnSequences TechniquesOnSequences[]
   @@map(name: "sequences")
+}
+
+model TechniquesOnSequences {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sequence Sequence @relation(fields: [ sequenceId ], references: [ id ])
+  sequenceId Int
+  technique Technique @relation(fields: [ techniqueId ], references: [ id ])
+  techniqueId Int
+  @@id([ sequenceId, techniqueId ])
+  @@map(name: "techniques_on_sequences")
 }
