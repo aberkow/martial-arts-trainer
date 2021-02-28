@@ -3,7 +3,12 @@ import { gql } from 'apollo-server-micro'
 const typeDefs = gql`
 
   type Query {
-    users: UsersConnection!
+    users(
+      first: Int
+      after: String
+      last: Int
+      before: String
+    ): UsersConnection!
     me: User
   }
 
@@ -36,10 +41,12 @@ const typeDefs = gql`
   # implement edges and nodes for users
   type UsersConnection {
     edges: [UserEdge]!
-    total: Int
+    total: Int!
+    pageInfo: PageInfo!
   }
 
   type UserEdge {
+    cursor: String
     node: User!
   }
 
@@ -50,6 +57,13 @@ const typeDefs = gql`
     userName: String
     email: String!
     password: String!
+  }
+
+  type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    startCursor: String!
+    endCursor: String!
   }
 `
 
