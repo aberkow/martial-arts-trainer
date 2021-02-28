@@ -88,6 +88,8 @@ const resolvers = {
 
         hasPreviousPage = !!args.before
 
+        console.log({ length: nodes.length, last });
+
         hasNextPage = nodes.length > last
 
         if (hasPreviousPage) nodes.shift()
@@ -286,7 +288,9 @@ const apolloServer = new ApolloServer({
     }
 
     return context
-  }
+  },
+  playground: process.env.VERCEL_ENV !== 'production' ? true : false,
+  introspection: process.env.VERCEL_ENV !== 'production' ? true : false
 })
 
 // required as per https://nextjs.org/docs/api-routes/api-middlewares#custom-config
