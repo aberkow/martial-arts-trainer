@@ -9,104 +9,21 @@ import dotenv from 'dotenv'
 import typeDefs from '../../graphql/typeDefs'
 import prisma from '../../prisma/prisma'
 import tokenGenerator from '../../lib/tokenGenerator'
-import { cursorGenerator, cursorDecoder, isBackwardPagination, isForwardPagination } from '../../lib/pagination'
+import { cursorGenerator, paginateWithCursors } from '../../lib/pagination'
 
 dotenv.config()
 
 const resolvers = {
   Query: {
     users: async (_, args, { prisma }) => {
-      // based around - https://github.com/devoxa/prisma-relay-cursor-connection/blob/master/src/index.ts
 
-      let nodes = []
-      let hasNextPage = false
-      let hasPreviousPage = false
-
-      if (isForwardPagination(args)) {
-
-        // the most we'll allow to first to be is 100
-        const first = args.first > 100 ? 100 : args.first
-
-        // take 1 extra node
-        const take = Math.abs(first + 1)
-
-        // if there's a cursor, decode it
-        const cursorID = args.after ? cursorDecoder(args.after) : null
-
-        // if there's a cursor, we need to apply a skip
-        const skip = cursorID ? 1 : 0
-
-        // set up args for findMany
-        const prismaArgs = {
-          take,
-          skip,
-        }
-        
-        // if there's a decoded cursor ID, apply that to the args
-        if (cursorID) {
-          prismaArgs.cursor = {
-            id: cursorID
-          }
-        }
-
-        // assign nodes to the result
-        nodes = await prisma.user.findMany(prismaArgs)
-
-        // if there was an args.after, then there was a previous page
-        hasPreviousPage = !!args.after
-
-        // if the total number of nodes is more than the clamped value of "first" there is a next page
-        hasNextPage = nodes.length > first
-
-        // before returning, discard the last entry from the nodes
-        if (hasNextPage) nodes.pop()
-      } else if (isBackwardPagination(args)) {
-
-        const last = args.last > 100 ? 100 : args.last
-
-        // prisma requires a negative number to paginate backwards
-        const take = (Math.abs(last + 1)) * -1
-
-        const cursorID = args.before ? cursorDecoder(args.before) : null
-        const skip = cursorID ? 1 : 0
-
-        // set up args for findMany
-        const prismaArgs = {
-          take,
-          skip,
-        }
-
-        // if there's a decoded cursor ID, apply that to the args
-        if (cursorID) {
-          prismaArgs.cursor = {
-            id: cursorID
-          }
-        }
-
-        nodes = await prisma.user.findMany(prismaArgs)
-
-        hasPreviousPage = !!args.before
-
-        hasNextPage = nodes.length > last
-
-        // make sure that when we get to the start of the list, we _don't_ shift the array
-        if (hasPreviousPage && hasNextPage) nodes.shift()
-      } else {
-        // if there are no other params, just take 10
-        nodes = await prisma.user.findMany({
-          take: 10
-        })
-      }
-
-      // assign page info
-      const lastUser = nodes[nodes.length - 1]
-
-      const pageInfo = {
-        hasPreviousPage,
-        hasNextPage,
-        startCursor: cursorGenerator('user', nodes[0]['id']),
-        endCursor: cursorGenerator('user', lastUser.id),
-      }
+      const { nodes, pageInfo } = await paginateWithCursors({
+        prisma,
+        args,
+        type: 'user',
+      }, {
+        test: 'test test test'
+      })
 
       // create edges
       const edges = nodes.map(user => {
