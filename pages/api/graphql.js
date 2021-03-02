@@ -64,6 +64,7 @@ const resolvers = {
 
         const last = args.last > 100 ? 100 : args.last
 
+        // prisma requires a negative number to paginate backwards
         const take = (Math.abs(last + 1)) * -1
 
         const cursorID = args.before ? cursorDecoder(args.before) : null
@@ -84,15 +85,12 @@ const resolvers = {
 
         nodes = await prisma.user.findMany(prismaArgs)
 
-        console.log({take, length: nodes.length, prismaArgs });
-
         hasPreviousPage = !!args.before
-
-        console.log({ length: nodes.length, last });
 
         hasNextPage = nodes.length > last
 
-        if (hasPreviousPage) nodes.shift()
+        // make sure that when we get to the start of the list, we _don't_ shift the array
+        if (hasPreviousPage && hasNextPage) nodes.shift()
       } else {
         // if there are no other params, just take 10
         nodes = await prisma.user.findMany({
