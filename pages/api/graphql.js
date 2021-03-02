@@ -21,8 +21,6 @@ const resolvers = {
         prisma,
         args,
         type: 'user',
-      }, {
-        test: 'test test test'
       })
 
       // create edges

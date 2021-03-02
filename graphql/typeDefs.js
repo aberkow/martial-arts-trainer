@@ -8,6 +8,7 @@ const typeDefs = gql`
       after: String
       last: Int
       before: String
+      where: UserWhereInput
     ): UsersConnection!
     me: User
   }
@@ -36,6 +37,11 @@ const typeDefs = gql`
     name: String
     userName: String
     password: String
+  }
+
+  input UserWhereInput {
+    name: String
+    userName: String
   }
 
   # implement edges and nodes for users
