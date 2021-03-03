@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@prisma/client": "^2.16.1",
+    "@prisma/client": "^2.18.0",
     "apollo-server-micro": "^2.21.0",
     "bcrypt": "^5.0.0",
     "cookies": "^0.8.0",
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@prisma/cli": "^2.16.1",
-    "prisma": "^2.16.1"
+    "faker": "^5.4.0",
+    "prisma": "^2.18.0"
   }
 }
