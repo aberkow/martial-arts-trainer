@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-micro'
 
 const techniqueTypeDefs = gql`
-  type TechniqueConnection {
+  type TechniquesConnection {
     edges: [TechniqueEdge]!
     total: Int!
     pageInfo: PageInfo!

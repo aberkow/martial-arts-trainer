@@ -53,12 +53,33 @@ const resolvers = {
         }
       }
 
-      return await prisma.user.findUnique({
-        where,
-        include: {
-          techniques: true
+      const found = await prisma.user.findUnique({ where })
+
+      const techniques = await paginateWithCursors({
+        prisma,
+        args: {
+          where: {
+            creatorId: found.uuid
+          }
+        },
+        type: 'technique'
+      })
+
+      const techniqueEdges = techniques.nodes.map(technique => {
+        return {
+          cursor: cursorGenerator('technique', technique.id),
+          node: technique
         }
       })
+
+      return {
+        ...found,
+        techniques: {
+          edges: techniqueEdges,
+          pageInfo: techniques.pageInfo,
+          total: techniqueEdges.length
+        }
+      }
     }
   },
   Mutation: {

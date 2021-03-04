@@ -20,7 +20,8 @@ const userTypeDefs = gql`
     userName: String
     email: String!
     password: String!
-    techniques: [Technique]!
+    # techniques: [Technique]!
+    techniques: TechniquesConnection!
   }
 `
 
