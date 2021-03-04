@@ -5,6 +5,7 @@ import Cookies from 'cookies'
 import { verify } from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 import dotenv from 'dotenv'
+import slugify from '@sindresorhus/slugify'
 
 import typeDefs from '../../graphql/typeDefs'
 import prisma from '../../prisma/prisma'
@@ -37,6 +38,28 @@ const resolvers = {
         total: edges.length
       }
     },
+    me: async (_, __, { verifiedUser, prisma }) => {
+      const { user } = verifiedUser
+
+      if (!user) {
+        throw new Error('Not authenticated')
+      }
+
+      const where = {}
+
+      for (const key in user) {
+        if (key === 'email' || key === 'uuid') {
+          where[key] = user[key]
+        }
+      }
+
+      return await prisma.user.findUnique({
+        where,
+        include: {
+          techniques: true
+        }
+      })
+    }
   },
   Mutation: {
     login: async (_, { credentials }, context) => {
@@ -121,6 +144,26 @@ const resolvers = {
       return await prisma.user.delete({ 
         where: {
           uuid: user.uuid
+        }
+      })
+    },
+    createTechnique: async (_, { techniqueData }, { verifiedUser, prisma }) => {
+
+      const { user } = verifiedUser
+
+      if (!user) throw new Error('Not authenticated')
+
+      return await prisma.technique.create({
+        data: {
+          creator: {
+            connect: {
+              uuid: user.uuid
+            }
+          },
+          uuid: uuidv4(),
+          name: techniqueData.name,
+          description: techniqueData.description,
+          slug: slugify(techniqueData.name)
         }
       })
     }
