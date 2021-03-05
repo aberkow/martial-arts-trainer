@@ -16,7 +16,8 @@ import slugify from '@sindresorhus/slugify'
 import typeDefs from '../../graphql/typeDefs'
 import prisma from '../../prisma/prisma'
 import tokenGenerator from '../../lib/tokenGenerator'
-import { cursorGenerator, paginateWithCursors } from '../../lib/pagination'
+
+import * as userQueries from '../../graphql/queries/userQueries'
 
 dotenv.config()
 /**
@@ -27,72 +28,8 @@ dotenv.config()
  */
 const resolvers = {
   Query: {
-
-
-    users: async (_, args, ctx) => {
-      const { nodes, pageInfo } = await paginateWithCursors({
-        prisma,
-        args,
-        type: 'user',
-      })
-
-      // create edges
-      const edges = nodes.map(user => {
-        return { 
-          cursor: cursorGenerator('user', user.id),
-          node: user 
-        }
-      })
-
-      return {
-        edges,
-        pageInfo,
-        total: edges.length
-      }
-    },
-    me: async (_, __, { verifiedUser, prisma }) => {
-      const { user } = verifiedUser
-
-      if (!user) {
-        throw new Error('Not authenticated')
-      }
-
-      const where = {}
-
-      for (const key in user) {
-        if (key === 'email' || key === 'uuid') {
-          where[key] = user[key]
-        }
-      }
-
-      const found = await prisma.user.findUnique({ where })
-
-      const techniques = await paginateWithCursors({
-        prisma,
-        args: {
-          where: {
-            creatorId: found.uuid
-          }
-        },
-        type: 'technique'
-      })
-
-      const techniqueEdges = techniques.nodes.map(technique => {
-        return {
-          cursor: cursorGenerator('technique', technique.id),
-          node: technique
-        }
-      })
-
-      return {
-        ...found,
-        techniques: {
-          edges: techniqueEdges,
-          pageInfo: techniques.pageInfo,
-          total: techniqueEdges.length
-        }
-      }
-    }
+    users: async (_, args, ctx) => userQueries.users(_, args, ctx),
+    me: async (_, __, ctx) => userQueries.me(_, __, ctx)
   },
   Mutation: {
     login: async (_, { credentials }, context) => {
