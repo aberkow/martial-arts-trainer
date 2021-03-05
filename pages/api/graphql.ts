@@ -1,9 +1,3 @@
-/*
-* 
-* @typedef { import("@prisma/client").PrismaClient } Prisma
-*
-*/
-
 import { ApolloServer } from 'apollo-server-micro'
 import Cors from 'micro-cors'
 import bcrypt from 'bcrypt'
@@ -19,19 +13,12 @@ import tokenGenerator from '../../lib/tokenGenerator'
 import { cursorGenerator, paginateWithCursors } from '../../lib/pagination'
 
 dotenv.config()
-/**
- *
- * @param {any} parent
- * @param {object} args
- * @param {{ prisma: Prisma }} ctx
- */
+
 const resolvers = {
   Query: {
-
-
-    users: async (_, args, ctx) => {
+    users: async (_: void, args: object, ctx: Context) => {
       const { nodes, pageInfo } = await paginateWithCursors({
-        prisma,
+        prisma: ctx.prisma,
         args,
         type: 'user',
       })
@@ -52,6 +39,8 @@ const resolvers = {
     },
     me: async (_, __, { verifiedUser, prisma }) => {
       const { user } = verifiedUser
+
+      
 
       if (!user) {
         throw new Error('Not authenticated')
