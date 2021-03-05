@@ -16,8 +16,6 @@ import { cursorGenerator, paginateWithCursors } from '../../lib/pagination'
 module.exports = {
   users: async (_, args, ctx) => {
 
-    const { prisma } = ctx
-
     const { nodes, pageInfo } = await paginateWithCursors({
       prisma,
       args,

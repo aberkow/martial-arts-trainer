@@ -1,17 +1,16 @@
 import { ApolloServer } from 'apollo-server-micro'
 import Cors from 'micro-cors'
-import bcrypt from 'bcrypt'
 import Cookies from 'cookies'
 import { verify } from 'jsonwebtoken'
-import { v4 as uuidv4 } from 'uuid'
 import dotenv from 'dotenv'
-import slugify from '@sindresorhus/slugify'
 
 import typeDefs from '../../graphql/typeDefs'
 import prisma from '../../prisma/prisma'
 import tokenGenerator from '../../lib/tokenGenerator'
 
 import * as userQueries from '../../graphql/queries/userQueries'
+import * as userMutations from '../../graphql/mutations/userMutations'
+import * as techniqueMutations from '../../graphql/mutations/techniqueMutations'
 
 dotenv.config()
 
@@ -21,118 +20,11 @@ const resolvers = {
     me: async (_, __, ctx) => userQueries.me(_, __, ctx)
   },
   Mutation: {
-    login: async (_, { credentials }, context) => {
-      const cookies = context.cookies
-
-      const where = {}
-
-      if (credentials.user.email !== null && credentials.user.email !== '') {
-        where.email = credentials.user.email
-      } else {
-        where.userName = credentials.user.userName
-      }
-
-      const user = await prisma.user.findUnique({ where })
-
-      if (!user) {
-        throw new Error('No user with that email or username found')
-      }
-
-      const isValid = await bcrypt.compare(credentials.password, user.password)
-
-      if (!isValid) {
-        throw new Error('Invalid password')
-      }
-
-      const token = tokenGenerator(user.uuid, user.email, '5m')
-      const refreshToken = tokenGenerator(user.uuid, user.email, '1w')
-
-      const tokenDate = new Date(Date.now() + 60 * 5 * 1000)
-      const refreshDate = new Date(Date.now() + 60 * 60 * 24 * 7 * 1000)
-
-      cookies.set('mat-token', token, {
-        expires: tokenDate
-      })
-      cookies.set('mat-refresh-token', refreshToken, {
-        expires: refreshDate
-      })
-
-      return user
-    },
-    createUser: async (_, { userData }, { prisma }) => {
-
-      const hashedPassword = bcrypt.hashSync(userData.password, 10)
-
-      delete userData.password
-
-      return await prisma.user.create({
-        data: {
-          uuid: uuidv4(),
-          email: userData.email,
-          name: userData.name,
-          password: hashedPassword,
-          userName: userData.userName
-        }
-      })
-    },
-    updateUser: async (_, { userData }, { verifiedUser, prisma }) => {
-      const { user } = verifiedUser
-
-      if (!user) throw new Error('Not authenticated')
-
-      const updatedData = {}
-
-      for (const key in userData) {
-        if (Object.hasOwnProperty.call(userData, key)) {
-          const element = userData[key];
-          updatedData[key] = element
-        }
-      }
-
-      return await prisma.user.update({
-        where: {
-          uuid: user.uuid
-        },
-        data: updatedData
-      })
-    },
-    deleteUser: async (_, __, { verifiedUser, prisma }) => {
-      const { user } = verifiedUser
-      if (!user) throw new Error('Not authenticated')
-
-      return await prisma.user.delete({ 
-        where: {
-          uuid: user.uuid
-        }
-      })
-    },
-    createTechnique: async (_, { techniqueData }, { verifiedUser, prisma }) => {
-
-      const { user } = verifiedUser
-
-      if (!user) throw new Error('Not authenticated')
-
-      const connect = {}
-
-      for (const key in user) {
-        if (key === 'email' || key === 'uuid') {
-          connect[key] = user[key]
-        }
-      }
-
-      return await prisma.technique.create({
-        data: {
-          creator: { connect },
-          uuid: uuidv4(),
-          name: techniqueData.name,
-          description: techniqueData.description,
-          slug: slugify(techniqueData.name)
-        },
-        include: {
-          creator: true
-        }
-      })
-    }
+    login: async (_, args, ctx) => userMutations.login(_, args, ctx),
+    createUser: async (_, args, ctx) => userMutations.createUser(_, args, ctx),
+    updateUser: async (_, args, ctx) => userMutations.updateUser(_, args, ctx),
+    deleteUser: async (_, __, ctx) => userMutations.deleteUser(_, __, ctx),
+    createTechnique: async (_, args, ctx) => techniqueMutations.createTechnique(_, args, ctx)
   }
 }
 
