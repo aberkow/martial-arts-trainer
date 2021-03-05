@@ -1,9 +1,3 @@
-/*
-* 
-* @typedef { import("@prisma/client").PrismaClient } Prisma
-*
-*/
-
 import { ApolloServer } from 'apollo-server-micro'
 import Cors from 'micro-cors'
 import bcrypt from 'bcrypt'
@@ -20,12 +14,7 @@ import tokenGenerator from '../../lib/tokenGenerator'
 import * as userQueries from '../../graphql/queries/userQueries'
 
 dotenv.config()
-/**
- *
- * @param {any} parent
- * @param {object} args
- * @param {{ prisma: Prisma }} ctx
- */
+
 const resolvers = {
   Query: {
     users: async (_, args, ctx) => userQueries.users(_, args, ctx),
