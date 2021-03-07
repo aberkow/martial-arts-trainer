@@ -13,11 +13,11 @@ import { cursorGenerator, paginateWithCursors } from '../../lib/pagination'
  * @param {{ prisma: Prisma }} ctx
  */
 
-module.exports = {
+export const userQueries = {
   users: async (_, args, ctx) => {
 
     const { nodes, pageInfo } = await paginateWithCursors({
-      prisma,
+      prisma: ctx.prisma,
       args,
       type: 'user',
     })

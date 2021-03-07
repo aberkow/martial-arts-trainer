@@ -8,23 +8,32 @@ import typeDefs from '../../graphql/typeDefs'
 import prisma from '../../prisma/prisma'
 import tokenGenerator from '../../lib/tokenGenerator'
 
-import * as userQueries from '../../graphql/queries/userQueries'
-import * as userMutations from '../../graphql/mutations/userMutations'
-import * as techniqueMutations from '../../graphql/mutations/techniqueMutations'
+import { userQueries } from '../../graphql/queries/userQueries'
+import { userMutations } from '../../graphql/mutations/userMutations'
+import { techniqueMutations } from '../../graphql/mutations/techniqueMutations'
 
 dotenv.config()
+
+export interface Context {
+  prisma: typeof prisma,
+  verifiedUser: { user: any },
+  response: Response,
+  cookies: Cookies
+}
 
 const resolvers = {
   Query: {
     users: async (_, args, ctx) => userQueries.users(_, args, ctx),
-    me: async (_, __, ctx) => userQueries.me(_, __, ctx)
+    me: async (_, __, ctx) => userQueries.me(_, __, ctx),
   },
   Mutation: {
     login: async (_, args, ctx) => userMutations.login(_, args, ctx),
     createUser: async (_, args, ctx) => userMutations.createUser(_, args, ctx),
     updateUser: async (_, args, ctx) => userMutations.updateUser(_, args, ctx),
     deleteUser: async (_, __, ctx) => userMutations.deleteUser(_, __, ctx),
-    createTechnique: async (_, args, ctx) => techniqueMutations.createTechnique(_, args, ctx)
+    createTechnique: async (_, args, ctx) => techniqueMutations.createTechnique(_, args, ctx),
+    updateTechnique: async (_, args, ctx) => techniqueMutations.updateTechnique(_, args, ctx),
+    deleteTechnique: async (_, args, ctx) => techniqueMutations.deleteTechnique(_, args, ctx)
   }
 }
 
@@ -41,10 +50,11 @@ const apolloServer = new ApolloServer({
       keys: [ process.env.COOKIE_KEY ]
     })
 
-    const context = {
+    const context: Context = {
       prisma,
       response: res,
-      cookies
+      cookies,
+      verifiedUser: { user: {} }
     }
 
     if (req.headers.authorization !== undefined) {

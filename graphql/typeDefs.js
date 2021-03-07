@@ -36,6 +36,8 @@ const queryAndMutationTypes = gql`
     updateUser(userData: UserInput!): User
     deleteUser: User
     createTechnique(techniqueData: TechniqueInput!): Technique!
+    updateTechnique(techniqueData: TechniqueInput!): Technique!
+    deleteTechnique(techniqueID: String!): Boolean!
   }
 `
 
