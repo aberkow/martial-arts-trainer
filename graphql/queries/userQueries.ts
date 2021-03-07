@@ -1,23 +1,11 @@
-/*
-*
-* @typedef { import("@prisma/client").PrismaClient } Prisma
-*
-*/
-
 import { cursorGenerator, paginateWithCursors } from '../../lib/pagination'
-
-/**
- *
- * @param {any} parent
- * @param {object} args
- * @param {{ prisma: Prisma }} ctx
- */
+import { Context } from '../../pages/api/graphql'
 
 export const userQueries = {
-  users: async (_, args, ctx) => {
-
+  users: async (_, args, { prisma }: Context) => {
+    
     const { nodes, pageInfo } = await paginateWithCursors({
-      prisma: ctx.prisma,
+      prisma,
       args,
       type: 'user',
     })
@@ -36,8 +24,8 @@ export const userQueries = {
       total: edges.length
     }
   },
-  me: async (_, __, ctx) => {
-    const { verifiedUser, prisma } = ctx
+  me: async (_, __, { verifiedUser, prisma }: Context) => {
+
     const { user } = verifiedUser
 
     if (!user) {
