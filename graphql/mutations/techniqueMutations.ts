@@ -6,44 +6,22 @@ import { Context } from '../../pages/api/graphql'
 
 export const techniqueMutations = {
   createTechnique: async (_, { techniqueData }, ctx: Context) => {
-    let slug = ''
+    const uuid = uuidv4()
+    const slug = `${slugify(techniqueData.name)}-${uuid.substr(0, 8)}`
 
     const { prisma, verifiedUser } = ctx
   
     const connectedUser = connectToUser(verifiedUser)
-    // const countableSlug = slugify.counter()
-    // const slug = slugify(techniqueData.name)
-  
-    // const lastWithSlug = await prisma.technique.findMany({
-    //   take: -1,
-    //   where: {
-    //     slug: {
-    //       contains: slug
-    //     }
-    //   }
-    // })
-
-    // if (lastWithSlug.length > 0) {
-    //   slug = countableSlug(lastWithSlug[lastWithSlug.length - 1]['slug'])
-    //   console.log({ slug });
-      
-    // } else {
-    //   slug = slugify(techniqueData.name)
-    // }
-
-
-    // console.log({ lastWithSlug, slug });
-    
 
     return await prisma.technique.create({
       data: {
         creator: { 
           connect: connectedUser 
         },
-        uuid: uuidv4(),
+        uuid,
         name: techniqueData.name,
         description: techniqueData.description,
-        slug: slugify(techniqueData.name)
+        slug
       },
       include: {
         creator: true

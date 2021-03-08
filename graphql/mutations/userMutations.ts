@@ -7,7 +7,10 @@ export const userMutations = {
   login: async (_, { credentials }, ctx: Context) => {
     const { prisma, cookies } = ctx
 
-    const where = {}
+    const where = {
+      email: null,
+      userName: null
+    }
 
     if (credentials.user.email !== null && credentials.user.email !== '') {
       where.email = credentials.user.email
