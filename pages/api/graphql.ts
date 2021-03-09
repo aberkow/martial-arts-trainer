@@ -11,6 +11,7 @@ import tokenGenerator from '../../lib/tokenGenerator'
 import { userQueries } from '../../graphql/queries/userQueries'
 import { userMutations } from '../../graphql/mutations/userMutations'
 import { techniqueMutations } from '../../graphql/mutations/techniqueMutations'
+import { sequenceMutations } from '../../graphql/mutations/sequenceMutations'
 
 dotenv.config()
 
@@ -33,7 +34,10 @@ const resolvers = {
     deleteUser: async (_, __, ctx) => userMutations.deleteUser(_, __, ctx),
     createTechnique: async (_, args, ctx) => techniqueMutations.createTechnique(_, args, ctx),
     updateTechnique: async (_, args, ctx) => techniqueMutations.updateTechnique(_, args, ctx),
-    deleteTechnique: async (_, args, ctx) => techniqueMutations.deleteTechnique(_, args, ctx)
+    deleteTechnique: async (_, args, ctx) => techniqueMutations.deleteTechnique(_, args, ctx),
+    createSequence: async (_, args, ctx) => sequenceMutations.createSequence(_, args, ctx),
+    updateSequence: async (_, args, ctx) => sequenceMutations.updateSequence(_, args, ctx),
+    deleteSequence: async (_, args, ctx) => sequenceMutations.deleteSequence(_, args, ctx),
   }
 }
 

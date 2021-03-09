@@ -2,9 +2,11 @@ import { gql } from 'apollo-server-micro'
 
 import userTypeDefs from './types/userTypeDefs'
 import utilityTypeDefs from './types/utilityTypeDefs'
+import sequenceTypeDefs from './types/sequenceTypeDefs'
 import techniqueTypeDefs from './types/techniqueTypeDefs'
 
 import authInputs from './inputs/authInputs'
+import sequenceInputs from './inputs/sequenceInputs'
 import techniqueInputs from './inputs/techniqueInputs'
 import userInputs from './inputs/userInputs'
 
@@ -38,6 +40,9 @@ const queryAndMutationTypes = gql`
     createTechnique(techniqueData: TechniqueInput!): Technique!
     updateTechnique(techniqueData: TechniqueInput!): Technique!
     deleteTechnique(techniqueID: String!): Boolean!
+    createSequence(sequenceData: SequenceInput!): Sequence!
+    updateSequence(sequenceData: SequenceInput!): Sequence!
+    deleteSequence(sequenceId: String): Boolean!
   }
 `
 
@@ -47,7 +52,9 @@ const typeDefs = [
   techniqueTypeDefs,
   userTypeDefs,
   utilityTypeDefs,
+  sequenceTypeDefs,
   authInputs,
+  sequenceInputs,
   techniqueInputs,
   userInputs,
 ]
