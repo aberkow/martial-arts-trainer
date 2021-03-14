@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server-micro'
 import Cors from 'micro-cors'
 import Cookies from 'cookies'
-import { verify } from 'jsonwebtoken'
+const jsonwebtoken = require('jsonwebtoken')
 import dotenv from 'dotenv'
 
 import typeDefs from '../../graphql/typeDefs'
@@ -67,11 +67,11 @@ const apolloServer = new ApolloServer({
       const authHeader = req.headers.authorization
       const payload = authHeader.replace('Bearer', '').trim()
 
-      const verified = verify(payload, "secret!!", (err, decoded) => {
+      const verified = jsonwebtoken.verify(payload, "secret!!", (err, decoded) => {
         return err ? false : decoded
       })
 
-      const verifiedRefreshToken = verify(refreshToken, 'secret!!', (err, decoded) => {
+      const verifiedRefreshToken = jsonwebtoken.verify(refreshToken, 'secret!!', (err, decoded) => {
         return err ? false : decoded
       })
 
@@ -80,7 +80,7 @@ const apolloServer = new ApolloServer({
        * Let the resolvers handle any errors
        * Redirect back to login
        */
-      if (!verified && !verifiedRefreshToken) {
+      if (!verified  && verifiedRefreshToken !== null) {
         cookies.set('ma-app-token')
         cookies.set('ma-app-refresh-token')
         return context
