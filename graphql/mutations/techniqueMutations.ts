@@ -33,6 +33,15 @@ export const techniqueMutations = {
     return true
   },
   deleteTechnique: async(_, { techniqueID }, { verifiedUser, prisma }: Context) => {
-    return true
+
+    const { user } = verifiedUser
+
+    if (!user) throw new Error('Not authenticated')
+
+    return await prisma.technique.delete({
+      where: {
+        uuid: techniqueID
+      }
+    })
   }
 }

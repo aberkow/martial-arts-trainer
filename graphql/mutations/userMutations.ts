@@ -12,10 +12,13 @@ export const userMutations = {
       userName: null
     }
 
+    // findUnique expects exactly one where arg
     if (credentials.user.email !== null && credentials.user.email !== '') {
       where.email = credentials.user.email
+      delete where.userName
     } else {
       where.userName = credentials.user.userName
+      delete where.email
     }
 
     const user = await prisma.user.findUnique({ where })
