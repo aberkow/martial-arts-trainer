@@ -26,8 +26,9 @@ const queryAndMutationTypes = gql`
       after: String
       last: Int
       before: String
+      where: CreatorWhereInput!
     ): TechniquesConnection!
-    technique(techniqueID: String): Technique
+    technique(techniqueID: String!): Technique
   }
 
   type Mutation {

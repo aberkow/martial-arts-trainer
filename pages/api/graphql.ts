@@ -9,6 +9,7 @@ import prisma from '../../prisma/prisma'
 import tokenGenerator from '../../lib/tokenGenerator'
 
 import { userQueries } from '../../graphql/queries/userQueries'
+import { techniqueQueries } from '../../graphql/queries/techniqueQueries'
 import { userMutations } from '../../graphql/mutations/userMutations'
 import { techniqueMutations } from '../../graphql/mutations/techniqueMutations'
 import { sequenceMutations } from '../../graphql/mutations/sequenceMutations'
@@ -26,6 +27,8 @@ const resolvers = {
   Query: {
     users: async (_, args, ctx) => userQueries.users(_, args, ctx),
     me: async (_, __, ctx) => userQueries.me(_, __, ctx),
+    techniques: async (_, args, ctx) => techniqueQueries.techniques(_, args, ctx),
+    technique: async (_, args, ctx) => techniqueQueries.technique(_, args, ctx)
   },
   Mutation: {
     login: async (_, args, ctx) => userMutations.login(_, args, ctx),
