@@ -28,9 +28,23 @@ export const techniqueMutations = {
       }
     })
   },
-  updateTechnique: async(_, { techniqueData }, { verifiedUser, prisma }: Context) => {
+  updateTechnique: async (_, { techniqueID, techniqueData }, { verifiedUser, prisma }: Context) => {
     
-    return true
+    const { user } = verifiedUser
+
+    if (!user) throw new Error('Not authenticated')
+
+    return await prisma.technique.update({
+      where: {
+        uuid: techniqueID
+      },
+      data: {
+        ...techniqueData
+      },
+      include: {
+        creator: true
+      }
+    })
   },
   deleteTechnique: async(_, { techniqueID }, { verifiedUser, prisma }: Context) => {
 
