@@ -32,15 +32,24 @@ export const userQueries = {
       throw new Error('Not authenticated')
     }
 
-    const where = {}
-
-    for (const key in user) {
-      if (key === 'email' || key === 'uuid') {
-        where[key] = user[key]
-      }
+    const where = {
+      email: '',
+      uuid: ''
     }
 
-    const found = await prisma.user.findUnique({ where })
+    if (user.email !== null && user.email !== '') {
+      where.email = user.email
+      delete where.uuid
+    } else {
+      where.uuid = user.uuid
+      delete where.email
+    }
+
+    const found = await prisma.user.findUnique({
+      where: {
+        uuid: user.uuid
+      }
+    })
 
     const techniques = await paginateWithCursors({
       prisma,

@@ -61,7 +61,7 @@ const apolloServer = new ApolloServer({
       prisma,
       response: res,
       cookies,
-      verifiedUser: { user: {} }
+      verifiedUser: { user: false }
     }
 
     if (req.headers.authorization !== undefined) {
@@ -95,8 +95,8 @@ const apolloServer = new ApolloServer({
        */
       else if (!verified && verifiedRefreshToken) {
 
-        const token = tokenGenerator(verifiedRefreshToken.id, verifiedRefreshToken.email, '5m')
-        const refreshToken = tokenGenerator(verifiedRefreshToken.id, verifiedRefreshToken.email, '1w')
+        const token = tokenGenerator(verifiedRefreshToken.id, '5m')
+        const refreshToken = tokenGenerator(verifiedRefreshToken.id, '1w')
 
         const tokenDate = new Date(Date.now() + 60 * 5 * 1000)
         const refreshDate = new Date(Date.now() + 60 * 60 * 24 * 7 * 1000)
