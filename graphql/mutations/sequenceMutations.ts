@@ -42,12 +42,10 @@ export const sequenceMutations = {
         },
       },
       include: {
-        creator: true
+        creator: true,
+        techniquesOnSequences: true
       }
     })
-
-
-    createdSequence.techniques = techniques
 
     return createdSequence
   },
