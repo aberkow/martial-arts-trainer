@@ -42,6 +42,7 @@ model Sequence {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name String
+  slug String
   description String? @default("")
   creator User @relation(fields: [ creatorId ], references: [ uuid ])
   creatorId String
