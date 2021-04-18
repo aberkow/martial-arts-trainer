@@ -78,12 +78,15 @@ const apolloServer = new ApolloServer({
         return err ? false : decoded
       })
 
+      // console.log({ verified, verifiedRefreshToken });
+      
+
       /**
        * If both tokens fail, return the context immediately
        * Let the resolvers handle any errors
        * Redirect back to login
        */
-      if (!verified  && verifiedRefreshToken !== null) {
+      if (!verified  && !verifiedRefreshToken) {
         cookies.set('ma-app-token')
         cookies.set('ma-app-refresh-token')
         return context

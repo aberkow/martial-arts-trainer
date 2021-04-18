@@ -1,63 +1,67 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id Int @default(autoincrement()) @id
-  uuid String @unique
-  name String? @default("")
-  userName String? @unique
-  email String @unique
-  password String
+  id         Int         @id @default(autoincrement())
+  uuid       String      @unique
+  name       String?     @default("")
+  userName   String?     @unique
+  email      String      @unique
+  password   String
+  sequences  Sequence[]
   techniques Technique[]
-  sequences Sequence[]
-  @@map(name: "users")
+
+  @@map("users")
 }
 
 model Technique {
-  id Int @id @default(autoincrement())
-  uuid String @unique
-  createdAt DateTime @default(now())
-  udpatedAt DateTime @updatedAt
-  name String
-  slug String @unique
-  description String? @default("")
-  creator User @relation(fields: [ creatorId ], references: [ uuid ])
-  creatorId String
+  id                    Int                     @id @default(autoincrement())
+  createdAt             DateTime                @default(now())
+  udpatedAt             DateTime                @updatedAt
+  uuid                  String                  @unique
+  name                  String
+  slug                  String                  @unique
+  description           String?                 @default("")
+  creatorId             String
+  creator               User                    @relation(fields: [creatorId], references: [uuid])
   techniquesOnSequences TechniquesOnSequences[]
-  @@map(name: "techniques")
+
+  @@index([creatorId], name: "creatorId")
+  @@map("techniques")
 }
 
 model Sequence {
-  id Int @id @default(autoincrement())
-  uuid String @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name String
-  slug String
-  description String? @default("")
-  creator User @relation(fields: [ creatorId ], references: [ uuid ])
-  creatorId String
-  techniqueOrder Json
+  id                    Int                     @id @default(autoincrement())
+  uuid                  String                  @unique
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  name                  String
+  description           String?                 @default("")
+  creatorId             String
+  techniqueOrder        Json
+  slug                  String
+  creator               User                    @relation(fields: [creatorId], references: [uuid])
   techniquesOnSequences TechniquesOnSequences[]
-  @@map(name: "sequences")
+
+  @@index([creatorId], name: "creatorId")
+  @@map("sequences")
 }
 
 model TechniquesOnSequences {
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sequence Sequence @relation(fields: [ sequenceId ], references: [ id ])
-  sequenceId Int
-  technique Technique @relation(fields: [ techniqueId ], references: [ id ])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sequenceId  Int
   techniqueId Int
-  @@id([ sequenceId, techniqueId ])
-  @@map(name: "techniques_on_sequences")
+  sequence    Sequence  @relation(fields: [sequenceId], references: [id])
+  technique   Technique @relation(fields: [techniqueId], references: [id])
+
+  @@id([sequenceId, techniqueId])
+  @@index([techniqueId], name: "techniqueId")
+  @@map("techniques_on_sequences")
 }

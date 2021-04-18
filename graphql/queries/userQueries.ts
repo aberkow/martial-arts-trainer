@@ -32,6 +32,9 @@ export const userQueries = {
       throw new Error('Not authenticated')
     }
 
+    // console.log({ user });
+    
+
     const where = {
       email: '',
       uuid: ''
@@ -50,6 +53,17 @@ export const userQueries = {
         uuid: user.uuid
       }
     })
+
+    console.log({ found });
+    
+    const test = prisma.technique.findMany({
+      where: {
+        creatorId: found.uuid
+      }
+    })
+
+    console.log({ test });
+    
 
     const techniques = await paginateWithCursors({
       prisma,
